@@ -34,4 +34,46 @@ defmodule IntcodeTest do
     intlist = Intcode.intlist_from_file("input.txt")
     assert Intcode.run(intlist, %{input: [1]}).output == [0, 0, 0, 0, 0, 0, 0, 0, 0, 16_574_641]
   end
+
+  test "opcode 8, eq" do
+    program = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
+    assert Intcode.run(program, %{input: [8]}).output == [1]
+    assert Intcode.run(program, %{input: [9]}).output == [0]
+
+    program = [3, 3, 1108, -1, 8, 3, 4, 3, 99]
+    assert Intcode.run(program, %{input: [8]}).output == [1]
+    assert Intcode.run(program, %{input: [9]}).output == [0]
+  end
+
+  test "opcode 7, less than" do
+    program = [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]
+    assert Intcode.run(program, %{input: [5]}).output == [1]
+    assert Intcode.run(program, %{input: [9]}).output == [0]
+
+    program = [3, 3, 1107, -1, 8, 3, 4, 3, 99]
+    assert Intcode.run(program, %{input: [7]}).output == [1]
+    assert Intcode.run(program, %{input: [8]}).output == [0]
+  end
+
+  test "opcodes 5 & 6, jnz & jz" do
+    program = [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
+    assert Intcode.run(program, %{input: [123]}).output == [1]
+    assert Intcode.run(program, %{input: [0]}).output == [0]
+
+    program = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
+    assert Intcode.run(program, %{input: [123]}).output == [1]
+    assert Intcode.run(program, %{input: [0]}).output == [0]
+  end
+
+  test "fixture 1" do
+    intlist = Intcode.intlist_from_file("fixture-1.txt")
+    assert Intcode.run(intlist, %{input: [0]}).output == [999]
+    assert Intcode.run(intlist, %{input: [8]}).output == [1000]
+    assert Intcode.run(intlist, %{input: [12345]}).output == [1001]
+  end
+
+  test "part 2" do
+    intlist = Intcode.intlist_from_file("input.txt")
+    assert Intcode.run(intlist, %{input: [5]}).output == [15_163_975]
+  end
 end

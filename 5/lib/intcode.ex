@@ -17,6 +17,10 @@ defmodule Intcode do
   @mul 2
   @read 3
   @write 4
+  @jnz 5
+  @jz 6
+  @lt 7
+  @eq 8
   @hlt 99
 
   def run({@add, modes}, memory, context = %{ip: ip}) do
@@ -39,6 +43,42 @@ defmodule Intcode do
 
   def run({@write, modes}, memory, context = %{ip: ip, output: output}) do
     run(memory, %{context | ip: ip + 2, output: [atat(memory, ip, 1, modes) | output]})
+  end
+
+  def run({@jnz, modes}, memory, context = %{ip: ip}) do
+    case atat(memory, ip, 1, modes) do
+      0 ->
+        run(memory, %{context | ip: ip + 3})
+
+      _ ->
+        run(memory, %{context | ip: atat(memory, ip, 2, modes)})
+    end
+  end
+
+  def run({@jz, modes}, memory, context = %{ip: ip}) do
+    case atat(memory, ip, 1, modes) do
+      0 ->
+        run(memory, %{context | ip: atat(memory, ip, 2, modes)})
+
+      _ ->
+        run(memory, %{context | ip: ip + 3})
+    end
+  end
+
+  def run({@lt, modes}, memory, context = %{ip: ip}) do
+    truth = if atat(memory, ip, 1, modes) < atat(memory, ip, 2, modes), do: 1, else: 0
+
+    memory
+    |> update(ip + 3, truth)
+    |> run(%{context | ip: ip + 4})
+  end
+
+  def run({@eq, modes}, memory, context = %{ip: ip}) do
+    truth = if atat(memory, ip, 1, modes) == atat(memory, ip, 2, modes), do: 1, else: 0
+
+    memory
+    |> update(ip + 3, truth)
+    |> run(%{context | ip: ip + 4})
   end
 
   def run({@hlt, _modes}, memory, context = %{output: output}) do
@@ -73,7 +113,7 @@ defmodule Intcode do
 
   def intlist_from_file(path) do
     File.read!(path)
-    |> String.split(",")
+    |> String.split(~r/[\s,]+/, trim: true)
     |> Enum.map(&String.to_integer/1)
   end
 end
