@@ -14,7 +14,7 @@ defmodule IntcodeTest do
 
   test "reading incomplete input" do
     assert Intcode.run([3, 0, 3, 1, 99], %{input: [33]}) ==
-             (state = {:waiting, %{memory: [33, 0, 3, 1, 99], ip: 2, output: []}})
+             (state = {:waiting, %{memory: {[33, 0, 3, 1, 99], %{}}, ip: 2, output: [], base: 0}})
 
     assert Intcode.resume(state, %{input: [44]}).memory == [33, 44, 3, 1, 99]
   end
@@ -74,8 +74,8 @@ defmodule IntcodeTest do
     assert Intcode.run([104,1125899906842624,99]).output == [1125899906842624]
   end
 
-  # test "shifts base to copy itself" do
-  #   code = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]
-  #   assert Intcode.run(code).output == code
-  # end
+  test "shifts base to copy itself" do
+    code = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]
+    assert Intcode.run(code).output == code
+  end
 end

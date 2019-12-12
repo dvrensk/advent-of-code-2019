@@ -1,7 +1,8 @@
 defmodule Intcode do
-  import Enum, only: [at: 2]
+  import Enum, only: [at: 2, at: 3]
 
   def run(memory), do: run(memory, %{})
+  def run(memory, context) when is_list(memory), do: run({memory, %{}}, context)
 
   def run(memory, context) do
     context =
@@ -9,8 +10,18 @@ defmodule Intcode do
       |> Map.put_new(:ip, 0)
       |> Map.put_new(:input, [])
       |> Map.put_new(:output, [])
+      |> Map.put_new(:base, 0)
 
-    run(op(memory, context.ip), memory, context)
+    case context[:max] do
+      0 ->
+        {memory, context}
+      nil ->
+        run(op(memory, context.ip), memory, context)
+      n ->
+        IO.inspect(context)
+        IO.inspect(memory)
+        run(op(memory, context.ip), memory, %{context | max: n - 1})
+    end
   end
 
   def resume({:waiting, %{memory: memory, ip: ip, output: output}}, context) do
@@ -30,6 +41,7 @@ defmodule Intcode do
   @jz 6
   @lt 7
   @eq 8
+  @shift_base 9
   @hlt 99
 
   def run(@add, memory, context = %{ip: ip}) do
@@ -99,20 +111,30 @@ defmodule Intcode do
     |> run(%{context | ip: ip + 4})
   end
 
-  def run(@hlt, memory, context = %{output: output}) do
-    %{context | output: Enum.reverse(output)}
-    |> Map.put_new(:memory, memory)
+  def run(@shift_base, memory, context = %{ip: ip, base: base}) do
+    run(memory, %{context | ip: ip + 2, base: base + atat(memory, context, 1)})
   end
 
-  defp update(memory, position, value) do
-    List.replace_at(memory, at(memory, position), value)
+  def run(@hlt, {memlist, memmap}, context = %{output: output}) do
+    %{context | output: Enum.reverse(output)}
+    |> Map.put_new(:memory, memlist) # ignoring memmap for now
+  end
+
+  defp update({memlist, memmap}, position, value) do
+    position = at(memlist, position)
+    if position < length(memlist) do
+      {List.replace_at(memlist, position, value), memmap}
+    else
+      {memlist, Map.put(memmap, position, value)}
+    end
+    
   end
 
   defp op(memory, ip), do: elem(op_and_modes(memory, ip), 0)
   defp modes(memory, ip), do: elem(op_and_modes(memory, ip), 1)
 
-  defp op_and_modes(memory, ip) do
-    packed = at(memory, ip)
+  defp op_and_modes({memlist, _memmap}, ip) do
+    packed = at(memlist, ip)
 
     modes =
       div(packed, 100)
@@ -122,14 +144,15 @@ defmodule Intcode do
     {Integer.mod(packed, 100), modes}
   end
 
-  defp atat(memory, _context = %{ip: ip}, offset) do
-    case at(modes(memory, ip), offset - 1) do
-      1 ->
-        at(memory, ip + offset)
+  defp atat(memory = {memlist, memmap}, _context = %{ip: ip, base: base}, offset) do
+    position =
+      case at(modes(memory, ip), offset - 1, 0) do
+        0 -> at(memlist, ip + offset)
+        1 -> ip + offset
+        2 -> base + at(memlist, ip + offset)
+      end
 
-      _ ->
-        at(memory, at(memory, ip + offset))
-    end
+    at(memlist, position, memmap[position] || 0)
   end
 
   def intlist_from_file(path) do
