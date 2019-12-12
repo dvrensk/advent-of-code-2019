@@ -69,18 +69,23 @@ defmodule IntcodeTest do
   end
 
   test "it handles big integers" do
-    assert Intcode.run([1102,34915192,34915192,7,4,7,99,0]).output == [1219070632396864]
-    assert String.length(Integer.to_string(1219070632396864)) == 16
-    assert Intcode.run([104,1125899906842624,99]).output == [1125899906842624]
+    assert Intcode.run([1102, 34_915_192, 34_915_192, 7, 4, 7, 99, 0]).output == [
+             1_219_070_632_396_864
+           ]
+
+    assert String.length(Integer.to_string(1_219_070_632_396_864)) == 16
+    assert Intcode.run([104, 1_125_899_906_842_624, 99]).output == [1_125_899_906_842_624]
   end
 
   test "shifts base to copy itself" do
-    code = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]
+    code = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
     assert Intcode.run(code).output == code
   end
 
   test "task 1" do
-    assert Intcode.run(Intcode.intlist_from_file("input.txt"), %{input: [1]}).output == [3839402290]
+    assert Intcode.run(Intcode.intlist_from_file("input.txt"), %{input: [1]}).output == [
+             3_839_402_290
+           ]
   end
 
   test "task 2" do

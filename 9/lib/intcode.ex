@@ -15,8 +15,10 @@ defmodule Intcode do
     case context[:max] do
       0 ->
         {memory, context}
+
       nil ->
         run(op(memory, context.ip), memory, context)
+
       n ->
         IO.inspect(context)
         IO.inspect(memory)
@@ -117,7 +119,8 @@ defmodule Intcode do
 
   def run(@hlt, {memlist, memmap}, context = %{output: output}) do
     %{context | output: Enum.reverse(output)}
-    |> Map.put_new(:memory, memlist) # ignoring memmap for now
+    # ignoring memmap for now
+    |> Map.put_new(:memory, memlist)
   end
 
   defp update(memory = {memlist, memmap}, context = %{ip: ip, base: base}, offset, value) do
@@ -133,7 +136,6 @@ defmodule Intcode do
     else
       {memlist, Map.put(memmap, position, value)}
     end
-    
   end
 
   defp op(memory, ip), do: elem(op_and_modes(memory, ip), 0)
