@@ -46,13 +46,13 @@ defmodule Intcode do
 
   def run(@add, memory, context = %{ip: ip}) do
     memory
-    |> update(ip + 3, atat(memory, context, 1) + atat(memory, context, 2))
+    |> update(context, 3, atat(memory, context, 1) + atat(memory, context, 2))
     |> run(%{context | ip: ip + 4})
   end
 
   def run(@mul, memory, context = %{ip: ip}) do
     memory
-    |> update(ip + 3, atat(memory, context, 1) * atat(memory, context, 2))
+    |> update(context, 3, atat(memory, context, 1) * atat(memory, context, 2))
     |> run(%{context | ip: ip + 4})
   end
 
@@ -67,7 +67,7 @@ defmodule Intcode do
 
   def run(@read, memory, context = %{ip: ip, input: [head | tail]}) do
     memory
-    |> update(ip + 1, head)
+    |> update(context, 1, head)
     |> run(%{context | ip: ip + 2, input: tail})
   end
 
@@ -99,7 +99,7 @@ defmodule Intcode do
     truth = if atat(memory, context, 1) < atat(memory, context, 2), do: 1, else: 0
 
     memory
-    |> update(ip + 3, truth)
+    |> update(context, 3, truth)
     |> run(%{context | ip: ip + 4})
   end
 
@@ -107,7 +107,7 @@ defmodule Intcode do
     truth = if atat(memory, context, 1) == atat(memory, context, 2), do: 1, else: 0
 
     memory
-    |> update(ip + 3, truth)
+    |> update(context, 3, truth)
     |> run(%{context | ip: ip + 4})
   end
 
@@ -120,8 +120,14 @@ defmodule Intcode do
     |> Map.put_new(:memory, memlist) # ignoring memmap for now
   end
 
-  defp update({memlist, memmap}, position, value) do
-    position = at(memlist, position)
+  defp update(memory = {memlist, memmap}, context = %{ip: ip, base: base}, offset, value) do
+    position =
+      case at(modes(memory, ip), offset - 1, 0) do
+        0 -> at(memlist, ip + offset)
+        1 -> ip + offset
+        2 -> base + at(memlist, ip + offset)
+      end
+
     if position < length(memlist) do
       {List.replace_at(memlist, position, value), memmap}
     else
