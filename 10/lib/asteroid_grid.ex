@@ -70,9 +70,43 @@ defmodule AsteroidGrid do
     end
   end
 
+  def rad(dx, dy) do
+    case :math.atan2(dx, -dy) do
+      n when n < 0 -> n + 2 * :math.pi()
+      n -> n
+    end
+  end
+
   def rock?({grid, _max}, pos) do
     MapSet.member?(grid, pos)
   end
 
   def blank?(grid, pos), do: not rock?(grid, pos)
+
+  def vape_in_order(path, laser_pos) do
+    parse(path)
+    |> group_by(laser_pos)
+    |> Enum.sort_by(&elem(&1, 0))
+    |> Enum.map(&elem(&1, 1))
+    |> one_at_a_time()
+  end
+
+  def group_by({grid, _max}, pos = {x1, y1}) do
+    grid
+    |> Enum.reject(fn e -> pos == e end)
+    |> Enum.group_by(fn {x2, y2} -> rad(x2 - x1, y2 - y1) end)
+    |> Enum.map(fn {key, list} -> {key, Enum.sort_by(list, &distance(pos, &1))} end)
+    |> Enum.into(%{})
+  end
+
+  def distance({x1, y1}, {x2, y2}) do
+    :math.pow(x2 - x1, 2) + :math.pow(y2 - y1, 2)
+  end
+
+  def one_at_a_time(lists), do: one_at_a_time(lists, [], [])
+
+  def one_at_a_time([], [], ack), do: Enum.reverse(ack)
+  def one_at_a_time([], old, ack), do: one_at_a_time(Enum.reverse(old), [], ack)
+  def one_at_a_time([[] | lists], old, ack), do: one_at_a_time(lists, old, ack)
+  def one_at_a_time([[a | as] | lists], old, ack), do: one_at_a_time(lists, [as | old], [a | ack])
 end
