@@ -3,6 +3,7 @@ defmodule Intcode do
 
   def run(memory), do: run(memory, %{})
   def run(memory, context) when is_list(memory), do: run({memory, %{}}, context)
+  def run(path, context) when is_binary(path), do: run({intlist_from_file(path), %{}}, context)
 
   def run(memory, context) do
     context =
