@@ -29,8 +29,8 @@ defmodule Intcode do
     end
   end
 
-  def send_packets_to_network(context = %{network: network, output: [a,b,c]}) do
-    send(network, {:packet, {c,b,a}, self()})
+  def send_packets_to_network(context = %{network: {network, nic}, output: [a, b, c]}) do
+    send(network, {:packet, {c, b, a}, nic})
     %{context | output: []}
   end
 
@@ -38,8 +38,8 @@ defmodule Intcode do
 
   def receive_from_network(context = %{input: input}) do
     receive do
-      {:from_network, {x,y}} ->
-        %{context | input: input ++ [x,y]}
+      {:from_network, {x, y}} ->
+        %{context | input: input ++ [x, y]}
     after
       0 -> context
     end
@@ -83,7 +83,9 @@ defmodule Intcode do
     |> run(%{context | ip: ip + 2, input: tail})
   end
 
-  def run(@read, memory, context = %{ip: ip, input: [], network: _network}) do
+  def run(@read, memory, context = %{ip: ip, input: [], network: {network, nic}}) do
+    send(network, {:idling, nic})
+
     memory
     |> update(context, 1, -1)
     |> run(%{context | ip: ip + 2})
