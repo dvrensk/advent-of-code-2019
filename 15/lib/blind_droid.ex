@@ -2,6 +2,23 @@ defmodule BlindDroid do
   @origo {0, 0}
 
   def shortest_path() do
+    {_grid, graph, oxygen} = build_all()
+    :digraph.get_short_path(graph, @origo, oxygen)
+  end
+
+  def oxygenise(), do: longest_shortest_path()
+
+  def longest_shortest_path() do
+    {grid, graph, oxygen} = build_all()
+
+    Enum.reject(grid, fn {_, e} -> is_number(e) end)
+    |> Enum.map(&elem(&1, 0))
+    |> Enum.map(&:digraph.get_short_path(graph, oxygen, &1))
+    |> Enum.sort_by(&length(&1))
+    |> List.last()
+  end
+
+  def build_all() do
     {grid, _} = chart(2000)
     graph = build_graph(grid)
 
@@ -11,7 +28,7 @@ defmodule BlindDroid do
         _ -> nil
       end)
 
-    :digraph.get_short_path(graph, @origo, oxygen)
+    {grid, graph, oxygen}
   end
 
   def chart(max \\ -1) do

@@ -32,8 +32,12 @@ defmodule BlindDroidTest do
     assert map_size(grid) == 1 + 1658
   end
 
-  test "finds the shortest path with digraph" do
+  test "finds the shortest path with digraph (task 1)" do
     path = BlindDroid.shortest_path()
     assert length(tl(path)) == 424
+  end
+
+  test "finds the number of steps to fill the entire module with oxygen (task 2)" do
+    assert length(tl(BlindDroid.oxygenise())) == 446
   end
 end
