@@ -18,4 +18,14 @@ defmodule NanofactoryTest do
   test "it solves the puzzle (task 1)" do
     assert Nanofactory.solve("input.txt") == {387_001, "ORE"}
   end
+
+  test "with 1 trillion ore" do
+    assert Nanofactory.maximise("fixture-3.txt") == 82_892_753
+    assert Nanofactory.maximise("fixture-4.txt") == 5_586_022
+    assert Nanofactory.maximise("fixture-5.txt") == 460_664
+  end
+
+  test "it solves the puzzle for 1 trillion (task 2)" do
+    assert Nanofactory.maximise("input.txt") == 3_412_429
+  end
 end
