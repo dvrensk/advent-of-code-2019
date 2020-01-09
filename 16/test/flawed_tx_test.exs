@@ -20,8 +20,19 @@ defmodule FlawedTxTest do
     assert FlawedTx.transform8("69317163492948606335995924319873", 100) == "52432133"
   end
 
+  # test "part 1/10" do
+  #   text = File.read!("input.txt")
+  #   assert FlawedTx.transform8(text, 20) == "64324062"
+  # end
+
   test "part 1" do
     text = File.read!("input.txt")
     assert FlawedTx.transform8(text, 100) == "32002835"
   end
+
+  # test "input repeated 10000 times" do
+  #   assert FlawedTx.real_transform8("03036732577212944063491565474664") == "84462026"
+  #   assert FlawedTx.real_transform8("02935109699940807407585447034323") == "78725270"
+  #   assert FlawedTx.real_transform8("03081770884921959731165446850517") == "53553731"
+  # end
 end

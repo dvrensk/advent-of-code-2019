@@ -16,11 +16,29 @@ defmodule FlawedTx do
 
   def transform_one(list, position) do
     Enum.zip(list, factor_pattern(position))
-    |> Enum.map(fn {a, factor} -> a * factor end)
+    |> List.foldl(0, fn 
+      {_a, 0}, acc -> acc
+      {a, 1}, acc -> acc + a
+      {a, -1}, acc -> acc - a
+    end)
+    |> abs()
+    |> Integer.mod(10)
+  end
+
+  def transform_one_0(list, position) do
+    Enum.zip(list, factor_pattern(position))
+    |> Enum.map(&pattern_match/1)
+    # |> Enum.map(&multiply/1)
     |> Enum.sum()
     |> abs()
     |> Integer.mod(10)
   end
+
+  def multiply({a, factor}), do: a * factor
+
+  def pattern_match({_a, 0}), do: 0
+  def pattern_match({a, 1}), do: a
+  def pattern_match({a, -1}), do: -a
 
   def factor_pattern(index) when index > 0 do
     Stream.cycle([0, 1, 0, -1])
