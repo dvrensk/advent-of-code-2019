@@ -6,6 +6,11 @@ defmodule FlawedTxTest do
     assert Enum.take(FlawedTx.factor_pattern(2), 6) == [0, 1, 1, 0, 0, -1]
   end
 
+  test "the factor pattern, take 2" do
+    assert FlawedTx.factor_pattern_2(1, 5) == [1, 0, -1, 0, 1]
+    assert FlawedTx.factor_pattern_2(2, 6) == [0, 1, 1, 0, 0, -1]
+  end
+
   test "example 1, 1 phase" do
     assert FlawedTx.transform("12345678", 1) == "48226158"
   end
@@ -20,19 +25,8 @@ defmodule FlawedTxTest do
     assert FlawedTx.transform8("69317163492948606335995924319873", 100) == "52432133"
   end
 
-  # test "part 1/10" do
-  #   text = File.read!("input.txt")
-  #   assert FlawedTx.transform8(text, 20) == "64324062"
-  # end
-
   test "part 1" do
     text = File.read!("input.txt")
     assert FlawedTx.transform8(text, 100) == "32002835"
   end
-
-  # test "input repeated 10000 times" do
-  #   assert FlawedTx.real_transform8("03036732577212944063491565474664") == "84462026"
-  #   assert FlawedTx.real_transform8("02935109699940807407585447034323") == "78725270"
-  #   assert FlawedTx.real_transform8("03081770884921959731165446850517") == "53553731"
-  # end
 end
