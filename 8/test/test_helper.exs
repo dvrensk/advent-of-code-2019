@@ -1,1 +1,1 @@
-ExUnit.start()
+ExUnit.start(formatters: [KataCommitter, ExUnit.CLIFormatter])
